@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Job Portal Build Order</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Newsreader:opsz,wght@6..72,400;6..72,600;6..72,700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+
+<style>
+:root{
+  --ground:#FAFAF9;
+  --surface:#FFFFFF;
+  --surface-2:#F1F1EE;
+  --ink:#16181A;
+  --muted:#5A6470;
+  --rule:#E4E4DF;
+  --accent:#38556E;
+  --accent-soft:#E9EEF3;
+  --fix:#A8261C;
+  --fix-soft:#FAEBE9;
+  --ok:#2C6A4A;
+  --ok-soft:#E7F1EB;
+  --code-bg:#15181B;
+  --code-ink:#DCE0E4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#111214;
+    --surface:#191B1E;
+    --surface-2:#212429;
+    --ink:#E9EAEC;
+    --muted:#959DA9;
+    --rule:#272A2F;
+    --accent:#93B2CC;
+    --accent-soft:#1A242D;
+    --fix:#E88C82;
+    --fix-soft:#2C1917;
+    --ok:#7FC3A0;
+    --ok-soft:#152520;
+    --code-bg:#0B0D0F;
+    --code-ink:#DCE0E4;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#111214;
+  --surface:#191B1E;
+  --surface-2:#212429;
+  --ink:#E9EAEC;
+  --muted:#959DA9;
+  --rule:#272A2F;
+  --accent:#93B2CC;
+  --accent-soft:#1A242D;
+  --fix:#E88C82;
+  --fix-soft:#2C1917;
+  --ok:#7FC3A0;
+  --ok-soft:#152520;
+  --code-bg:#0B0D0F;
+  --code-ink:#DCE0E4;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);color:var(--ink);
+  font-family:"Public Sans",system-ui,sans-serif;
+  font-size:16px;line-height:1.62;margin:0;-webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:940px;margin:0 auto;padding:0 20px 90px}
+
+.masthead{padding:50px 0 24px;border-bottom:1px solid var(--rule)}
+.eyebrow{
+  font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 14px
+}
+h1{
+  font-family:Newsreader,Georgia,serif;font-weight:700;
+  font-size:clamp(2.1rem,5.6vw,3.2rem);line-height:1.04;
+  letter-spacing:-.015em;margin:0 0 14px;text-wrap:balance
+}
+.dek{color:var(--muted);max-width:62ch;margin:0;font-size:1.05rem}
+
+h2{
+  font-family:Newsreader,Georgia,serif;font-weight:600;
+  font-size:clamp(1.5rem,3.4vw,2rem);line-height:1.14;
+  margin:0 0 6px;text-wrap:balance
+}
+h3{font-family:Newsreader,Georgia,serif;font-weight:600;font-size:1.28rem;margin:0 0 3px}
+h4{
+  font-family:"JetBrains Mono",monospace;font-weight:600;font-size:.74rem;
+  letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:24px 0 9px
+}
+.section{margin-top:56px}
+.section-lead{color:var(--muted);margin:0 0 24px;max-width:64ch}
+
+p{margin:0 0 13px;max-width:68ch}
+ul,ol{margin:0 0 13px;padding-left:21px;max-width:68ch}
+li{margin-bottom:5px}
+code{
+  font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85em;
+  background:var(--surface-2);padding:1px 5px;border-radius:3px
+}
+a{color:var(--accent)}
+
+/* steps — numbering is the literal build order */
+.step{
+  display:grid;grid-template-columns:46px 1fr;gap:0 20px;
+  padding-top:28px;margin-top:28px;border-top:1px solid var(--rule)
+}
+.step:first-of-type{border-top:none;margin-top:14px}
+.stepnum{
+  font-family:"JetBrains Mono",monospace;font-weight:600;font-size:12.5px;
+  color:var(--accent);border:1.5px solid var(--accent);border-radius:50%;
+  width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  font-variant-numeric:tabular-nums;margin-top:2px
+}
+.step-body{min-width:0}
+.why{color:var(--muted);font-size:.95rem;margin:0 0 13px}
+@media (max-width:640px){.step{grid-template-columns:1fr;gap:9px}}
+
+/* code */
+.codewrap{position:relative;margin:0 0 13px}
+.filename{
+  font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted);
+  display:block;padding:0 0 5px 2px;letter-spacing:.03em
+}
+pre{
+  background:var(--code-bg);color:var(--code-ink);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:12.5px;line-height:1.62;padding:15px 17px;margin:0;
+  border-radius:5px;overflow-x:auto;border:1px solid var(--rule)
+}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+.copy{
+  position:absolute;top:7px;right:7px;font-family:"JetBrains Mono",monospace;
+  font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+  background:rgba(255,255,255,.07);color:#96A0AC;
+  border:1px solid rgba(255,255,255,.14);border-radius:3px;
+  padding:3px 7px;cursor:pointer;opacity:0;transition:opacity .14s
+}
+.codewrap:hover .copy,.copy:focus-visible{opacity:1}
+.copy:hover{color:#DCE0E4}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* callouts */
+.box{border-radius:0 5px 5px 0;padding:13px 17px;margin:0 0 15px;border-left:3px solid var(--rule);background:var(--surface-2)}
+.box p:last-child{margin-bottom:0}
+.box.fix{border-left-color:var(--fix);background:var(--fix-soft)}
+.box.ok{border-left-color:var(--ok);background:var(--ok-soft)}
+.box.note{border-left-color:var(--accent);background:var(--accent-soft)}
+.tag{
+  font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.13em;
+  text-transform:uppercase;font-weight:600;display:block;margin-bottom:5px
+}
+.box.fix .tag{color:var(--fix)}
+.box.ok .tag{color:var(--ok)}
+.box.note .tag{color:var(--accent)}
+
+/* audit list */
+.audit{list-style:none;padding:0;max-width:none;display:grid;gap:11px}
+.audit li{
+  background:var(--surface);border:1px solid var(--rule);border-radius:6px;
+  padding:15px 17px;margin:0
+}
+.audit .verdict{
+  font-family:"JetBrains Mono",monospace;font-size:.68rem;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:600;display:inline-block;
+  padding:2px 7px;border-radius:3px;margin-bottom:7px
+}
+.v-break{color:var(--fix);background:var(--fix-soft);border:1px solid var(--fix)}
+.v-wrong{color:var(--fix);background:var(--fix-soft);border:1px solid var(--rule)}
+.v-fine{color:var(--ok);background:var(--ok-soft);border:1px solid var(--ok)}
+.audit h3{font-size:1.06rem;margin-bottom:5px}
+.audit p{font-size:.95rem;margin-bottom:8px}
+.audit p:last-child{margin-bottom:0}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:6px;background:var(--surface);margin:0 0 20px}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:500px}
+th{
+  font-family:"JetBrains Mono",monospace;font-weight:600;font-size:.7rem;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  text-align:left;padding:10px 13px;border-bottom:1px solid var(--rule);
+  background:var(--surface-2);white-space:nowrap
+}
+td{padding:9px 13px;border-bottom:1px solid var(--rule);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.mono{font-family:"JetBrains Mono",monospace;font-size:.85rem}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">Verified against the running app · Laravel 13.26 · Inertia 3 · React 19</p>
+  <h1>Job Portal Build Order</h1>
+  <p class="dek">Every step checked against your working project rather than written from memory. Start at <code>laravel new</code>, finish with a demo that answers both the PSRS and UTUMISHI papers.</p>
+</header>
+
+<!-- ================= AUDIT ================= -->
+<section class="section">
+  <h2>First: what the guide you pasted gets wrong</h2>
+  <p class="section-lead">Four of these would cost you real time in the exam. One is a claim I have to walk back about my own earlier advice, because I checked the framework source and I was wrong.</p>
+
+  <ul class="audit">
+    <li>
+      <span class="verdict v-break">Breaks login</span>
+      <h3>Seeded users can never get past <code>/verify-email</code></h3>
+      <p>The guide seeds with <code>User::create([...])</code> and never sets <code>email_verified_at</code>. Your <code>User</code> implements <code>MustVerifyEmail</code>, and every route sits behind <code>['auth', 'verified']</code>. So all three seeded accounts log in and are immediately bounced to a verification screen — with no mail driver configured to escape it.</p>
+      <p><strong>Fix:</strong> use <code>User::factory()->create([...])</code>. The factory sets <code>email_verified_at =&gt; now()</code> for you.</p>
+    </li>
+
+    <li>
+      <span class="verdict v-wrong">Factually wrong</span>
+      <h3><code>QUEUE_CONNECTION=sync</code> does not stop the <code>jobs</code> table</h3>
+      <p>The guide says setting this "prevents Laravel from creating the default <code>jobs</code> table". It does not. That table is created by a <em>migration</em> — <code>0001_01_01_000002_create_jobs_table.php</code> — which ships with the starter kit and runs regardless of your queue driver. Follow this advice and you hit the name collision anyway, but now you also can't queue anything.</p>
+      <p><strong>Fix:</strong> leave <code>QUEUE_CONNECTION</code> alone. Name your table <code>job_listings</code> instead (step 4 below).</p>
+    </li>
+
+    <li>
+      <span class="verdict v-break">Incomplete — still collides</span>
+      <h3>Renaming the migration <em>file</em> changes nothing</h3>
+      <p>"Rename the Job migration to <code>..._create_job_listings_table</code>" only renames the file on disk. Inside it still says <code>Schema::create('jobs', ...)</code>, so it still tries to create a table called <code>jobs</code> and still explodes. The filename is documentation; the string is what runs.</p>
+      <p><strong>Fix:</strong> change the string inside too, and add <code>protected $table = 'job_listings';</code> to the model.</p>
+    </li>
+
+    <li>
+      <span class="verdict v-break">Missing column</span>
+      <h3>No <code>has_disability</code> column</h3>
+      <p>The applications migration has <code>disability_priority</code> — the computed points — but no column storing <em>whether the candidate has a disability</em>. You can save the score and never the fact. The UTUMISHI paper's entire priority rule has nowhere to live.</p>
+      <p><strong>Fix:</strong> add <code>$table-&gt;boolean('has_disability')-&gt;default(false);</code></p>
+    </li>
+
+    <li>
+      <span class="verdict v-wrong">Wrong paths</span>
+      <h3><code>Pages/</code>, <code>.jsx</code>, and <code>Auth/Login.tsx</code></h3>
+      <p>This kit uses lowercase <code>resources/js/pages/</code>, TypeScript <code>.tsx</code>, and the login page is at <code>auth/login.tsx</code>. Create <code>resources/js/Pages/jobs/index.jsx</code> and Inertia will not find it — you get a blank page and a console error, which is a miserable thing to debug at minute fifty.</p>
+    </li>
+
+    <li>
+      <span class="verdict v-fine">Actually fine — my earlier claim was wrong</span>
+      <h3><code>bcrypt('password')</code> in a seeder is safe</h3>
+      <p>I was about to tell you this double-hashes and breaks login, because the <code>User</code> model casts <code>'password' =&gt; 'hashed'</code>. I checked the framework source in your <code>vendor/</code> first, and it doesn't:</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>// HasAttributes::castAttributeAsHashedString()
+if (! Hash::isHashed($value)) {
+    return Hash::make($value);
+}
+return $value;</code></pre></div>
+      <p>The cast checks whether the value is already a hash and leaves it alone. So <code>bcrypt()</code> there is <em>redundant</em>, not broken. Drop it for clarity, but it wasn't going to cost you anything. Verify before you trust — including when the claim comes from me.</p>
+    </li>
+
+    <li>
+      <span class="verdict v-wrong">Version</span>
+      <h3>It says Laravel 11. You're on Laravel 13.26.1</h3>
+      <p>Mostly harmless — the Kernel.php advice is right for any version since 11 — but it means the guide wasn't written against your project. I had this wrong too, and said "Laravel 12" throughout our earlier conversation. Your <code>composer.lock</code> is the authority.</p>
+    </li>
+  </ul>
+</section>
+
+<!-- ================= BUILD ================= -->
+<section class="section">
+  <h2>The build, in order</h2>
+  <p class="section-lead">Each step needs the one before it. Don't skip ahead — most "why is this broken" moments in a timed exam are really "I built things out of order".</p>
+
+  <div class="step">
+    <div class="stepnum">1</div>
+    <div class="step-body">
+      <h3>Starter kit</h3>
+      <p class="why">Gives you Fortify auth, Inertia, React, Tailwind, shadcn/ui, Wayfinder and Vite already wired together.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>laravel new my-app     # choose React
+cd my-app
+npm install
+npm run dev            # leave this running - it regenerates Wayfinder routes
+php artisan serve</code></pre></div>
+      <div class="box ok">
+        <span class="tag">Already done for you</span>
+        <p>Registration, login, password reset, email verification, session management, and <code>'password' =&gt; 'hashed'</code> on the User model. That is PSRS Part 1.a, 1.b and 1.d with zero lines written. Point at the cast during the demo.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">2</div>
+    <div class="step-body">
+      <h3>Role column</h3>
+      <p class="why">PSRS 1.c. Everything else about RBAC hangs off this one column.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan make:migration add_role_to_users_table --table=users</code></pre></div>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>// up()
+$table-&gt;string('role')-&gt;default('viewer')-&gt;after('email');
+
+// down()
+$table-&gt;dropColumn('role');</code></pre></div>
+      <p>Add <code>'role'</code> to the User model's fillable list, then <code>php artisan migrate</code>.</p>
+      <div class="box note">
+        <span class="tag">Watch the syntax</span>
+        <p>This kit declares fillable with a PHP attribute, not a property — <code>#[Fillable(['name', 'email', 'password', 'role'])]</code> above the class. If you go looking for <code>protected $fillable</code> you won't find it.</p>
+      </div>
+      <div class="box fix">
+        <span class="tag">Trap</span>
+        <p><code>string()</code>, never <code>enum()</code>. Enum columns are unsupported on SQLite and need an extra package to alter on MySQL. A string plus an <code>in:admin,editor,viewer</code> validation rule does the same job and never fights you.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">3</div>
+    <div class="step-body">
+      <h3>RBAC middleware</h3>
+      <p class="why">The gate in front of your routes.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan make:middleware CheckRole</code></pre></div>
+      <span class="filename">app/Http/Middleware/CheckRole.php</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>public function handle(Request $request, Closure $next, string ...$roles): Response
+{
+    if (! $request-&gt;user() || ! in_array($request-&gt;user()-&gt;role, $roles, true)) {
+        abort(403, 'Your role does not allow this action.');
+    }
+
+    return $next($request);
+}</code></pre></div>
+      <span class="filename">bootstrap/app.php — inside withMiddleware()</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>$middleware-&gt;alias([
+    'role' =&gt; \App\Http\Middleware\CheckRole::class,
+    'apikey' =&gt; \App\Http\Middleware\ApiKey::class,
+]);</code></pre></div>
+      <div class="box fix">
+        <span class="tag">Trap</span>
+        <p>There is no <code>app/Http/Kernel.php</code>. It was removed in Laravel 11 and you are on 13. Any tutorial that tells you to edit it is at least three major versions out of date.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">4</div>
+    <div class="step-body">
+      <h3>Job model — and the name collision</h3>
+      <p class="why">PSRS Part 2.I. This is the step that catches everyone.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan make:model Job -m</code></pre></div>
+      <p>Rename the generated migration to <code>..._create_job_listings_table.php</code> <strong>and</strong> change the string inside it:</p>
+      <span class="filename">database/migrations/…_create_job_listings_table.php</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Schema::create('job_listings', function (Blueprint $table) {
+    $table-&gt;id();
+    $table-&gt;string('title');
+    $table-&gt;string('department');
+    $table-&gt;string('location');
+    $table-&gt;decimal('salary', 12, 2);
+    $table-&gt;boolean('is_active')-&gt;default(true);
+    $table-&gt;timestamps();
+});</code></pre></div>
+      <span class="filename">app/Models/Job.php</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>class Job extends Model
+{
+    // 'jobs' is taken by Laravel's queue migration
+    protected $table = 'job_listings';
+
+    protected $fillable = ['title', 'department', 'location', 'salary', 'is_active'];
+
+    protected function casts(): array
+    {
+        return ['is_active' =&gt; 'boolean'];
+    }
+
+    public function applications(): HasMany
+    {
+        return $this-&gt;hasMany(Application::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query-&gt;where('is_active', true);
+    }
+}</code></pre></div>
+      <div class="box note">
+        <span class="tag">Say this if asked</span>
+        <p>"Laravel reserves <code>jobs</code> for the database queue driver, so the domain model is <code>Job</code> and the physical table is namespaced." That answer earns marks. Renaming the model to <code>Vacancy</code> works too, but then nothing on screen matches the paper's wording.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">5</div>
+    <div class="step-body">
+      <h3>Application model</h3>
+      <p class="why">PSRS 2.II and 2.IV, plus the UTUMISHI disability rule.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan make:model Application -m</code></pre></div>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Schema::create('applications', function (Blueprint $table) {
+    $table-&gt;id();
+
+    // constrained() would guess 'jobs' — name it explicitly
+    $table-&gt;foreignId('job_id')-&gt;constrained('job_listings')-&gt;cascadeOnDelete();
+
+    $table-&gt;string('candidate_name');
+    $table-&gt;string('candidate_email');
+    $table-&gt;text('resume_text');
+
+    $table-&gt;boolean('has_disability')-&gt;default(false);   // the FACT
+
+    $table-&gt;unsignedTinyInteger('resume_score')-&gt;nullable();
+    $table-&gt;unsignedTinyInteger('location_priority')-&gt;nullable();
+    $table-&gt;unsignedTinyInteger('disability_priority')-&gt;default(0);
+    $table-&gt;unsignedTinyInteger('final_score')-&gt;nullable();
+
+    $table-&gt;timestamps();
+
+    // "apply only once per job"
+    $table-&gt;unique(['job_id', 'candidate_email']);
+});</code></pre></div>
+      <div class="box fix">
+        <span class="tag">Two traps in one block</span>
+        <p><strong>One:</strong> <code>constrained()</code> infers the table from the column name — <code>job_id</code> → <code>jobs</code>. Ours isn't called that, so you must pass <code>'job_listings'</code>, or the migration dies with "no such table: jobs".</p>
+        <p><strong>Two:</strong> store <code>has_disability</code> as well as <code>disability_priority</code>. The score is derived; the fact is the data. Keep both.</p>
+      </div>
+      <p>Then <code>php artisan migrate</code>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">6</div>
+    <div class="step-body">
+      <h3>Scoring service</h3>
+      <p class="why">Where the marks are. The paper demands "classes or modules for separation of concern" — this file is your evidence.</p>
+      <span class="filename">app/Services/ScoringService.php</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>class ScoringService
+{
+    public function resumeScore(string $resumeText): int
+    {
+        return random_int(1, 10);   // the paper permits mocking
+    }
+
+    public function locationPriority(Job $job): int
+    {
+        return match (strtoupper(trim($job-&gt;location))) {
+            'REMOTE' =&gt; 3,
+            'DAR ES SALAAM' =&gt; 2,
+            default =&gt; 1,
+        };
+    }
+
+    public function disabilityPriority(bool $hasDisability): int
+    {
+        return $hasDisability ? 3 : 0;
+    }
+
+    /** Returns keys named after the columns, so the controller is one line. */
+    public function evaluate(Job $job, string $text, bool $hasDisability = false): array
+    {
+        $resume = $this-&gt;resumeScore($text);
+        $location = $this-&gt;locationPriority($job);
+        $disability = $this-&gt;disabilityPriority($hasDisability);
+
+        return [
+            'resume_score' =&gt; $resume,
+            'location_priority' =&gt; $location,
+            'disability_priority' =&gt; $disability,
+            'final_score' =&gt; $resume + $location + $disability,
+        ];
+    }
+}</code></pre></div>
+      <div class="box fix">
+        <span class="tag">Two details people drop</span>
+        <p><strong>Take a <code>Job</code>, not a string.</strong> The paper says in bold that points come from the job's location, <em>not the candidate's</em>. Typing the parameter makes passing the wrong one impossible.</p>
+        <p><strong><code>strtoupper(trim(...))</code>.</strong> A bare <code>match ($job-&gt;location)</code> is case-sensitive, so "remote" silently falls to the <code>default =&gt; 1</code> branch and your Remote jobs score wrong.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">7</div>
+    <div class="step-body">
+      <h3>Controllers</h3>
+      <p class="why">Every method is one or two lines. Anything longer belongs in the service.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan make:controller JobController --resource
+php artisan make:controller ApplicationController</code></pre></div>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>// JobController
+public function index(Request $request)
+{
+    return Inertia::render('jobs/index', [
+        'jobs' =&gt; Job::withCount('applications')-&gt;latest()-&gt;paginate(10)-&gt;withQueryString(),
+        'canManage' =&gt; $request-&gt;user()-&gt;canManageJobs(),
+    ]);
+}
+
+public function store(StoreJobRequest $request)
+{
+    Job::create($request-&gt;validated());
+
+    return to_route('jobs.index')-&gt;with('success', 'Job posted.');
+}
+
+// ApplicationController
+public function __construct(private ScoringService $scoring) {}
+
+public function store(StoreApplicationRequest $request, Job $job)
+{
+    $data = $request-&gt;validated();
+
+    $job-&gt;applications()-&gt;create([
+        ...$data,
+        'has_disability' =&gt; $request-&gt;boolean('has_disability'),
+        ...$this-&gt;scoring-&gt;evaluate($job, $data['resume_text'], $request-&gt;boolean('has_disability')),
+    ]);
+
+    return back()-&gt;with('success', 'Application processed successfully.');
+}
+
+public function review()
+{
+    return Inertia::render('applications/review', [
+        'applications' =&gt; Application::with('job:id,title,location')
+            -&gt;orderByDesc('final_score')-&gt;get(),
+    ]);
+}</code></pre></div>
+      <div class="box note">
+        <span class="tag">Why send <code>canManage</code></span>
+        <p>The server decides what a user may do and tells React. Never re-implement the role rules in JavaScript — you'd end up with two sources of truth that drift.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">8</div>
+    <div class="step-body">
+      <h3>Routes</h3>
+      <p class="why">The table of contents of your whole app — and your RBAC answer.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Route::middleware(['auth', 'verified'])-&gt;group(function () {
+    // anyone signed in
+    Route::resource('jobs', JobController::class)-&gt;only(['index', 'show']);
+    Route::post('jobs/{job}/apply', [ApplicationController::class, 'store'])
+        -&gt;name('jobs.apply');
+
+    // admin + editor
+    Route::middleware('role:admin,editor')-&gt;group(function () {
+        Route::resource('jobs', JobController::class)
+            -&gt;only(['store', 'update', 'destroy']);
+        Route::get('applications/review', [ApplicationController::class, 'review'])
+            -&gt;name('applications.review');
+        Route::get('reports', [ReportController::class, 'index'])-&gt;name('reports.index');
+    });
+
+    // admin only — assigning roles
+    Route::middleware('role:admin')-&gt;group(function () {
+        Route::get('users', [UserController::class, 'index'])-&gt;name('users.index');
+        Route::patch('users/{user}/role', [UserController::class, 'updateRole'])
+            -&gt;name('users.role');
+    });
+});</code></pre></div>
+      <div class="box note">
+        <span class="tag">This is the answer to "show me your RBAC"</span>
+        <p>Three groups, three levels of access, one resource split across two of them. Splitting is legal while the <code>only()</code> sets don't overlap. Note the last group is <code>role:admin</code> without editor — editors manage jobs, only admins manage people.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">9</div>
+    <div class="step-body">
+      <h3>API key</h3>
+      <p class="why">PSRS 1.e. Four minutes, and easy to demo convincingly.</p>
+      <span class="filename">app/Http/Middleware/ApiKey.php</span>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>if ($request-&gt;header('X-API-Key') !== config('services.api_key')) {
+    Log::warning('Rejected API request', ['ip' =&gt; $request-&gt;ip()]);
+
+    return response()-&gt;json(['error' =&gt; 'Unauthorized'], 401);
+}
+
+return $next($request);</code></pre></div>
+      <p><code>routes/api.php</code> does not exist. Create it, then register it in <code>bootstrap/app.php</code>:</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>-&gt;withRouting(
+    web: __DIR__.'/../routes/web.php',
+    api: __DIR__.'/../routes/api.php',   // adds the /api prefix automatically
+    commands: __DIR__.'/../routes/console.php',
+    health: '/up',
+)</code></pre></div>
+      <div class="box note">
+        <span class="tag">Skip install:api</span>
+        <p>The usual advice is <code>php artisan install:api</code>, but that also installs Sanctum, which a shared-key API doesn't need. One line in <code>bootstrap/app.php</code> does the same job.</p>
+      </div>
+      <div class="box fix">
+        <span class="tag">Trap</span>
+        <p>Read the key with <code>config('services.api_key')</code>, never <code>env('API_KEY')</code>. After <code>config:cache</code>, <code>env()</code> returns <code>null</code> everywhere outside <code>config/</code> and your API rejects every valid key.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">10</div>
+    <div class="step-body">
+      <h3>React pages</h3>
+      <p class="why">Three files. The same form block, three times.</p>
+      <div class="tablewrap">
+      <table>
+        <thead><tr><th>File</th><th>Holds</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">pages/jobs/index.tsx</td><td>Table + one inline form doing create <em>and</em> edit</td></tr>
+          <tr><td class="mono">pages/jobs/show.tsx</td><td>Job detail + apply form with the disability checkbox</td></tr>
+          <tr><td class="mono">pages/applications/review.tsx</td><td>Read-only table, the five named columns</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p>Copy the <code>&lt;Form&gt;</code> pattern from <code>resources/js/pages/auth/login.tsx</code>:</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>&lt;Form {...jobs.store.form()} resetOnSuccess className="grid gap-4"&gt;
+    {({ processing, errors }) =&gt; (
+        &lt;&gt;
+            &lt;Label htmlFor="title"&gt;Title&lt;/Label&gt;
+            &lt;Input id="title" name="title" required /&gt;
+            &lt;InputError message={errors.title} /&gt;
+
+            &lt;Checkbox name="has_disability" value="1" /&gt;
+
+            &lt;Button type="submit" disabled={processing}&gt;
+                {processing &amp;&amp; &lt;Spinner /&gt;}
+                Save
+            &lt;/Button&gt;
+        &lt;/&gt;
+    )}
+&lt;/Form&gt;</code></pre></div>
+      <div class="box fix">
+        <span class="tag">Three traps, all silent</span>
+        <p><code>jobs.store.form()</code> — <code>.form</code> is a property of the helper. <code>jobs.store().form()</code> is undefined.</p>
+        <p><code>value="1"</code> on the checkbox. Without it a ticked box sends <code>"on"</code>, which fails Laravel's <code>boolean</code> rule — so every candidate silently scores zero disability points.</p>
+        <p>After <code>paginate()</code> the rows are <code>page.data</code>, not <code>page</code>. A blank table right after adding pagination is always this.</p>
+      </div>
+      <div class="box note">
+        <span class="tag">Editing in place</span>
+        <p><code>&lt;Form&gt;</code> is uncontrolled — it reads the DOM. So use <code>defaultValue</code>, not <code>value</code>, and put a <code>key</code> on the Form so React remounts it when you switch which row you're editing. Without the key, the previous row's text stays on screen and it looks like your backend is broken.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">11</div>
+    <div class="step-body">
+      <h3>Seeders</h3>
+      <p class="why">The highest-value five minutes in the whole exam.</p>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>// use factory(), NOT User::create() — the factory sets email_verified_at
+User::factory()-&gt;create(['name' =&gt; 'Admin',  'email' =&gt; 'admin@psrs.go.tz',  'role' =&gt; 'admin']);
+User::factory()-&gt;create(['name' =&gt; 'Editor', 'email' =&gt; 'editor@psrs.go.tz', 'role' =&gt; 'editor']);
+User::factory()-&gt;create(['name' =&gt; 'Viewer', 'email' =&gt; 'viewer@psrs.go.tz', 'role' =&gt; 'viewer']);
+
+// one job per branch of the location rule
+Job::create(['title' =&gt; 'Software Engineer', 'location' =&gt; 'Remote',        'salary' =&gt; 1200000]);
+Job::create(['title' =&gt; 'HR Officer',        'location' =&gt; 'DAR ES SALAAM', 'salary' =&gt; 750000]);
+Job::create(['title' =&gt; 'Field Officer',     'location' =&gt; 'Mwanza',        'salary' =&gt; 600000]);
+
+// DatabaseSeeder — a seeder you never call does nothing at all
+$this-&gt;call([JobPortalSeeder::class, ApplicationSeeder::class]);</code></pre></div>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>php artisan migrate:fresh --seed              # wipe and rebuild
+php artisan db:seed --class=XSeeder          # run one seeder, keep existing data</code></pre></div>
+      <div class="box fix">
+        <span class="tag">The one that breaks everything</span>
+        <p><code>User::factory()</code>, not <code>User::create()</code>. The factory sets <code>email_verified_at</code>; a raw create leaves it null and your seeded accounts are trapped on the verification screen with no mail driver to escape it. Factory password is <code>password</code>.</p>
+      </div>
+      <div class="box note">
+        <span class="tag">Choose data that proves your logic</span>
+        <p>Seed one row per branch — Remote, Dar es Salaam, somewhere else, and a candidate with and without a disability. Then the Review table demonstrates the whole scoring system without you typing anything live.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="stepnum">12</div>
+    <div class="step-body">
+      <h3>Demo, in this order</h3>
+      <p class="why">Examiners mark what they see. Rehearse this once.</p>
+      <ol>
+        <li>Log in as <strong>viewer</strong>. No Review or Reports in the sidebar. Type <code>/reports</code> in the address bar → <strong>403</strong>. RBAC proven, not claimed.</li>
+        <li>Log in as <strong>admin</strong>. Post a job from the inline form.</li>
+        <li>Open the Remote job, apply, tick the disability box.</li>
+        <li>Apply again, same email → <em>"You have already applied for this job."</em></li>
+        <li>Open <strong>Review</strong> → five columns, Remote gave +3, the checkbox gave +3.</li>
+        <li>Two curls — 401, then 200:</li>
+      </ol>
+      <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>curl -i http://localhost:8000/api/jobs
+curl -i -H "X-API-Key: psrs-secret-key-2026" http://localhost:8000/api/jobs</code></pre></div>
+      <p>Then open <code>ScoringService.php</code> and say: <em>"the web form and the API score identically because the rules live in one class, not copy-pasted into two controllers."</em> That sentence is the separation-of-concern mark.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ADDING A PAGE ================= -->
+<section class="section">
+  <h2>How to add a page — the rules nobody writes down</h2>
+  <p class="section-lead">Inertia has no configuration file listing your pages. It works on naming conventions instead, and when you break one you get a blank screen rather than an error that tells you what's wrong. These are the contracts.</p>
+
+  <h4>Rule 1 · The name is the path</h4>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Inertia::render('jobs/index')  →  resources/js/pages/jobs/index.tsx
+Inertia::render('reports/index') →  resources/js/pages/reports/index.tsx</code></pre></div>
+  <p>The string is a path relative to <code>resources/js/pages/</code>, with no extension. It is <strong>case-sensitive</strong> and this kit uses lowercase folders.</p>
+  <div class="box fix">
+    <span class="tag">How this fails</span>
+    <p>Write <code>Inertia::render('Jobs/Index')</code> and you get a blank page with <em>"Page not found: ./pages/Jobs/Index.tsx"</em> in the browser console — not a PHP error, not a 500. If a page renders blank, check this first and check the console, always.</p>
+  </div>
+
+  <h4>Rule 2 · The second argument becomes your props</h4>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>// controller
+return Inertia::render('jobs/index', [
+    'jobs' =&gt; $jobs,
+    'canManage' =&gt; $request-&gt;user()-&gt;canManageJobs(),
+]);
+
+// page — the array keys ARE the prop names
+export default function Index({ jobs, canManage }: Props) { ... }</code></pre></div>
+  <p>Nothing else crosses the boundary. If React can't see a value, the controller didn't send it.</p>
+
+  <h4>Rule 3 · You never import a layout</h4>
+  <p><code>resources/js/app.tsx</code> chooses it from the page name:</p>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>layout: (name) =&gt; {
+    switch (true) {
+        case name === 'welcome':          return null;
+        case name.startsWith('auth/'):    return AuthLayout;
+        case name.startsWith('settings/'): return [AppLayout, SettingsLayout];
+        default:                          return AppLayout;   // ← your pages
+    }
+},</code></pre></div>
+  <p>So any new page gets the sidebar shell automatically. You only <em>configure</em> it, by assigning an object at the bottom of the file — that object is passed to the layout as props:</p>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Index.layout = {
+    breadcrumbs: [{ title: 'Jobs', href: jobs.index() }],
+};</code></pre></div>
+  <p class="why">That is why <code>auth/login.tsx</code> sets <code>{ title, description }</code> instead — <code>AuthLayout</code> takes different props. Same mechanism, different layout.</p>
+
+  <h4>Rule 4 · Route name decides the import</h4>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Route::get('reports', ...)-&gt;name('reports.index');
+// generates resources/js/routes/reports/index.ts
+
+import reports from '@/routes/reports';   // default export
+reports.index()        // { url: '/reports', method: 'get' }
+reports.index.url()    // '/reports'
+jobs.store.form()      // { action: '/jobs', method: 'post' }  ← for &lt;Form&gt;</code></pre></div>
+  <p>Routes are grouped by the first segment of the dotted name, so <code>jobs.index</code>, <code>jobs.store</code> and <code>jobs.apply</code> all land in <code>@/routes/jobs</code>.</p>
+  <div class="box note">
+    <span class="tag">If the import doesn't resolve</span>
+    <p>Wayfinder only regenerates while <code>npm run dev</code> is running. If it isn't, run <code>php artisan wayfinder:generate</code>. Don't assume you typed the name wrong.</p>
+  </div>
+
+  <h4>Rule 5 · Roles — three layers, only one is security</h4>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Layer</th><th>Where</th><th>Is it security?</th></tr></thead>
+    <tbody>
+      <tr><td>Route middleware</td><td class="mono">role:admin,editor</td><td><strong>Yes.</strong> The real gate.</td></tr>
+      <tr><td>Policy</td><td class="mono">Gate::authorize('delete', $job)</td><td><strong>Yes.</strong> Per-record.</td></tr>
+      <tr><td>Hidden sidebar link</td><td class="mono">app-sidebar.tsx</td><td>No. Convenience.</td></tr>
+      <tr><td>Hidden button</td><td class="mono">{canManage &amp;&amp; ...}</td><td>No. Convenience.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Hiding a link does not stop anyone typing the URL. Always guard the route as well — and in the demo, prove it by typing the URL as a viewer and showing the 403.</p>
+
+  <h4>Rule 6 · Deciding which group a page goes in</h4>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Everyone signed in?     → the outer ['auth', 'verified'] group
+Staff only?             → Route::middleware('role:admin,editor')
+Admin only?             → Route::middleware('role:admin')</code></pre></div>
+
+  <h3>Worked example: a "My Applications" page for applicants</h3>
+  <p class="why">Five files, in this order. Every rule above appears once.</p>
+
+  <span class="filename">1 · routes/web.php — inside the auth group, no role middleware (any applicant may see their own)</span>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>Route::get('my-applications', [ApplicationController::class, 'mine'])
+    -&gt;name('applications.mine');</code></pre></div>
+
+  <span class="filename">2 · ApplicationController — scope to the signed-in user</span>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>public function mine(Request $request)
+{
+    return Inertia::render('applications/mine', [
+        'applications' =&gt; Application::with('job:id,title,location')
+            -&gt;where('candidate_email', $request-&gt;user()-&gt;email)
+            -&gt;latest()
+            -&gt;get(),
+    ]);
+}</code></pre></div>
+  <div class="box fix">
+    <span class="tag">The security rule for "my" pages</span>
+    <p>Middleware can't help you here — every applicant may open this page. What protects the data is the <code>where()</code> clause scoping it to the current user. Drop that line and every applicant sees everyone's applications. <strong>Any page called "my something" is protected by its query, not by its route.</strong></p>
+  </div>
+
+  <span class="filename">3 · resources/js/pages/applications/mine.tsx — matches the render string exactly</span>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>import { Head } from '@inertiajs/react';
+import { Badge } from '@/components/ui/badge';
+import applications from '@/routes/applications';
+
+type Row = {
+    id: number;
+    final_score: number;
+    created_at: string;
+    job: { id: number; title: string; location: string };
+};
+
+export default function Mine({ applications: rows }: { applications: Row[] }) {
+    return (
+        &lt;&gt;
+            &lt;Head title="My Applications" /&gt;
+
+            &lt;div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4"&gt;
+                &lt;h1 className="text-2xl font-semibold"&gt;My Applications&lt;/h1&gt;
+
+                {rows.length === 0 &amp;&amp; (
+                    &lt;p className="text-muted-foreground"&gt;
+                        You haven't applied for anything yet.
+                    &lt;/p&gt;
+                )}
+
+                {rows.map((row) =&gt; (
+                    &lt;div key={row.id} className="rounded-lg border p-4"&gt;
+                        &lt;div className="font-medium"&gt;{row.job.title}&lt;/div&gt;
+                        &lt;Badge variant="outline"&gt;{row.job.location}&lt;/Badge&gt;
+                    &lt;/div&gt;
+                ))}
+            &lt;/div&gt;
+        &lt;/&gt;
+    );
+}
+
+Mine.layout = {
+    breadcrumbs: [{ title: 'My Applications', href: applications.mine() }],
+};</code></pre></div>
+  <div class="box note">
+    <span class="tag">Notice what is missing</span>
+    <p>No <code>import AppLayout</code>. No <code>&lt;AppLayout&gt;</code> wrapper. Rule 3 handles it — the sidebar, header and breadcrumb bar all appear because the page isn't under <code>auth/</code> or <code>settings/</code>.</p>
+  </div>
+
+  <span class="filename">4 · app-sidebar.tsx — the role-gated nav</span>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>const { auth } = usePage().props as unknown as { auth: Auth };
+
+const canManage = auth.user.role === 'admin' || auth.user.role === 'editor';
+const isAdmin = auth.user.role === 'admin';
+
+const mainNavItems: NavItem[] = [
+    { title: 'Dashboard', href: dashboard(), icon: LayoutGrid },
+    { title: 'Jobs', href: jobs.index(), icon: Briefcase },
+
+    // everyone sees this one
+    { title: 'My Applications', href: applications.mine(), icon: FileText },
+
+    // staff only
+    ...(canManage
+        ? [
+              { title: 'Review', href: applications.review(), icon: ClipboardList },
+              { title: 'Reports', href: reports.index(), icon: ChartColumn },
+          ]
+        : []),
+
+    // admin only
+    ...(isAdmin ? [{ title: 'Users', href: users.index(), icon: Users }] : []),
+];</code></pre></div>
+  <p>The <code>...(condition ? [item] : [])</code> spread is the whole trick — it adds the entries or adds nothing, inside one array literal.</p>
+  <div class="box fix">
+    <span class="tag">Two things that bite here</span>
+    <p><strong>Build the array inside the component,</strong> not at module scope. A <code>const</code> outside the function is evaluated once at import time, before any user exists, so <code>auth.user.role</code> would throw.</p>
+    <p><strong>Icons come from <code>lucide-react</code></strong> and the name must exist. Import a name that isn't there and Vite fails the whole page, not just the icon.</p>
+  </div>
+
+  <span class="filename">5 · Check it</span>
+  <div class="codewrap"><button class="copy">Copy</button>
+<pre><code>npx tsc --noEmit        # catches a wrong prop shape or a missing route helper
+# then open the page as a viewer AND as an admin</code></pre></div>
+  <p>Always view a new page as your <em>least</em> privileged role too. Half of RBAC bugs only appear when you stop testing as admin.</p>
+</section>
+
+<!-- ================= CHECKLIST ================= -->
+<section class="section">
+  <h2>Before you call time</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Requirement</th><th>Where it lives</th></tr></thead>
+    <tbody>
+      <tr><td>Passwords hashed (bcrypt)</td><td class="mono">User::casts() → 'password' =&gt; 'hashed'</td></tr>
+      <tr><td>Password reset</td><td class="mono">Fortify — /forgot-password</td></tr>
+      <tr><td>RBAC — enforcement</td><td class="mono">CheckRole + routes/web.php</td></tr>
+      <tr><td>RBAC — assignment</td><td class="mono">UserController + users/index.tsx</td></tr>
+      <tr><td>Session management</td><td class="mono">SESSION_LIFETIME + logout</td></tr>
+      <tr><td>API key auth</td><td class="mono">ApiKey middleware + routes/api.php</td></tr>
+      <tr><td>Job listings</td><td class="mono">JobController + jobs/index.tsx</td></tr>
+      <tr><td>Applications</td><td class="mono">ApplicationController@store</td></tr>
+      <tr><td>Location priority</td><td class="mono">ScoringService::locationPriority()</td></tr>
+      <tr><td>Disability priority</td><td class="mono">ScoringService::disabilityPriority()</td></tr>
+      <tr><td>Final score</td><td class="mono">ScoringService::evaluate()</td></tr>
+      <tr><td>Review summary</td><td class="mono">applications/review.tsx</td></tr>
+      <tr><td>Apply once per job</td><td class="mono">unique index + Rule::unique + UI</td></tr>
+      <tr><td>Separation of concern</td><td class="mono">app/Services/ScoringService.php</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Also: delete <code>_backup_before_jobportal/</code>, confirm <code>.env</code> is gitignored, and commit.</p>
+</section>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    var pre = btn.parentElement.querySelector('pre');
+    if (!pre) return;
+    navigator.clipboard.writeText(pre.innerText).then(function () {
+      var original = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = original; }, 1300);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
